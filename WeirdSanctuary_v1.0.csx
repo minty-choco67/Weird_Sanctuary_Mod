@@ -2106,6 +2106,118 @@ if (global.flag[2450] == 1 && global.flag[2453] == 1)
 ");
 
 importGroup.QueuePrepend(Step("obj_dw_church_darkmaze"), @"
+if (global.flag[2450] == 1 && global.flag[2470] == 1 && global.flag[2459] == 0)
+{
+    if (!variable_instance_exists(id, ""mham""))
+    {
+        mham = -4;
+        mhamcon = 0;
+    }
+    if (!i_ex(mham))
+    {
+        mham = scr_dark_marker(2034, 804, spr_gerson_hammer_trowable2);
+        with (mham)
+        {
+            image_speed = 0;
+            image_xscale = 3;
+            image_yscale = 3;
+            image_angle = 25;
+            depth = 999980;
+        }
+    }
+    if (variable_global_exists(""moddmret"") && global.moddmret == 1 && i_ex(obj_mainchara))
+    {
+        global.moddmret = 0;
+        global.facing = 3;
+        with (obj_mainchara)
+        {
+            setxy(2110, 820);
+            sprite_index = lsprite;
+            image_index = 0;
+        }
+        with (obj_caterpillarchara)
+        {
+            if (name == ""noelle"")
+            {
+                setxy(2170, 816);
+                scr_caterpillar_interpolate();
+                for (var _i = 0; _i < 25; _i++)
+                {
+                    facing[_i] = 3;
+                }
+            }
+        }
+        if (!snd_is_playing(global.currentsong[1]))
+        {
+            global.currentsong[0] = snd_init(""church_wip.ogg"");
+            global.currentsong[1] = mus_loop(global.currentsong[0]);
+        }
+    }
+    if (mhamcon == 0 && i_ex(mham) && i_ex(obj_mainchara) && global.interact == 0 && !d_ex() && button1_p() && point_distance(obj_mainchara.x + 19, obj_mainchara.y + 60, mham.x + 6, mham.y + 10) < 80)
+    {
+        mhamcon = 1;
+        global.interact = 1;
+        scr_speaker(""no_name"");
+        if (is_english())
+        {
+            msgset(0, ""* (There's a hammer lying here.)/"");
+            msgnext((global.flag[2471] == 1) ? ""* (Current difficulty: EASY.)/"" : ""* (Current difficulty: NORMAL.)/"");
+            msgnext(""* (On EASY^1, your HP recovers&at the start of each turn.)/"");
+            msgnext(""* (Choose the difficulty.)/%"");
+        }
+        else
+        {
+            msgset(0, ""＊ (ハンマーが　置いてある。)/"");
+            msgnext((global.flag[2471] == 1) ? ""＊ (いまの　むずかしさは&　 「かんたん」。)/"" : ""＊ (いまの　むずかしさは&　 「ふつう」。)/"");
+            msgnext(""＊ (「かんたん」に　すると&　 ターンの　はじめに&　 HPが　回復する。)/"");
+            msgnext(""＊ (むずかしさを　えらぼう。)/%"");
+        }
+        d_make();
+    }
+    if (mhamcon == 1 && !d_ex())
+    {
+        mhamcon = 2;
+        global.msc = -99;
+        global.choice = -1;
+        if (is_english())
+        {
+            global.choicemsg[0] = stringset(""#Easy"");
+            global.choicemsg[1] = stringset(""#Normal"");
+        }
+        else
+        {
+            global.choicemsg[0] = stringset(""#かんたん"");
+            global.choicemsg[1] = stringset(""#ふつう"");
+        }
+        global.choicemsg[2] = stringset("""");
+        global.choicemsg[3] = stringset("""");
+        scr_speaker(""no_name"");
+        msgset(0, ""\\C2 "");
+        d_make();
+    }
+    if (mhamcon == 2 && global.choice != -1)
+    {
+        global.flag[2471] = (global.choice == 0) ? 1 : 0;
+        global.choice = -1;
+        k_d(1);
+        mhamcon = 3;
+        scr_speaker(""no_name"");
+        if (is_english())
+        {
+            msgset(0, (global.flag[2471] == 1) ? ""* (Difficulty set to EASY.)/%"" : ""* (Difficulty set to NORMAL.)/%"");
+        }
+        else
+        {
+            msgset(0, (global.flag[2471] == 1) ? ""＊ (むずかしさを&　 「かんたん」に　した。)/%"" : ""＊ (むずかしさを&　 「ふつう」に　した。)/%"");
+        }
+        d_make();
+    }
+    if (mhamcon == 3 && !d_ex())
+    {
+        mhamcon = 0;
+        global.interact = 0;
+    }
+}
 if (global.flag[2450] == 1 && global.flag[2453] == 1 && variable_instance_exists(id, ""mcon"") && mcon >= 0)
 {
     scr_populatechars();
@@ -2716,12 +2828,34 @@ if (global.flag[2450] == 1 && global.flag[2453] == 1 && global.plot >= 151 && gl
     }
 }
 mquick = 0;
+mfromdm = 0;
 if (mcon == 0 && global.flag[2462] == 1)
 {
-    mcon = 20;
-    with (gerson_npc)
+    if (global.flag[2470] == 1)
     {
-        instance_destroy();
+        global.flag[2470] = 0;
+        global.modgerturn = 0;
+        mfromdm = 1;
+        mcon = 20;
+        with (gerson_npc)
+        {
+            instance_destroy();
+        }
+    }
+    else if (variable_global_exists(""modgerturn"") && global.modgerturn >= 2 && global.modgerturn <= 11)
+    {
+        global.flag[2470] = 1;
+        global.moddmret = 1;
+        mcon = -1;
+        room_goto(room_dw_church_darkmaze);
+    }
+    else
+    {
+        mcon = 20;
+        with (gerson_npc)
+        {
+            instance_destroy();
+        }
     }
 }
 if (global.flag[2450] == 1 && global.flag[2459] == 1)
@@ -3128,6 +3262,28 @@ if (global.flag[2450] == 1 && variable_instance_exists(id, ""mcon"") && mcon >= 
     if (mcon == 20 && i_ex(obj_mainchara))
     {
         mcon = 21;
+        if (mfromdm == 1)
+        {
+            global.facing = 1;
+            with (obj_mainchara)
+            {
+                setxy(330, 870);
+                sprite_index = rsprite;
+                image_index = 0;
+            }
+            with (obj_caterpillarchara)
+            {
+                if (name == ""noelle"")
+                {
+                    setxy(440, 866);
+                    scr_caterpillar_interpolate();
+                    for (var _i = 0; _i < 25; _i++)
+                    {
+                        facing[_i] = 3;
+                    }
+                }
+            }
+        }
         mquick = 0;
         global.interact = 1;
         obj_mainchara.cutscene = 1;
@@ -3574,7 +3730,7 @@ if (global.flag[2450] == 1 && global.encounterno == 9720)
     minit = 0;
     mturn = 1;
     mresume11 = 0;
-    if (variable_global_exists(""modgerturn"") && global.modgerturn >= 11)
+    if (variable_global_exists(""modgerturn"") && global.modgerturn >= 12)
     {
         mturn = 11;
         mresume11 = 1;
@@ -7494,6 +7650,36 @@ if (variable_instance_exists(id, ""modbattle"") && modbattle == 1)
     {
         global.modgerturn = mturn;
     }
+    if (!variable_instance_exists(id, ""mlastfight""))
+    {
+        mlastfight = global.myfight;
+        mhealturn = mturn;
+    }
+    if (global.flag[2471] == 1 && mfin == 0 && global.myfight == 0 && mlastfight != 0 && mturn >= 2 && mhealturn != mturn)
+    {
+        mhealturn = mturn;
+        var _hamt = (mturn >= 11) ? 60 : 30;
+        for (var _hi = 0; _hi < 3; _hi++)
+        {
+            if (global.char[_hi] != 0)
+            {
+                var _hgot = scr_heal(_hi, _hamt);
+                var _hbx = -1;
+                with (obj_battlecontroller)
+                {
+                    _hbx = scr_charbox_x(_hi);
+                }
+                if (_hgot > 0 && !is_undefined(_hbx) && _hbx >= 0)
+                {
+                    with (instance_create(_hbx + 70 + camerax(), cameray() + 430, obj_healwriter))
+                    {
+                        healamt = _hgot;
+                    }
+                }
+            }
+        }
+    }
+    mlastfight = global.myfight;
     if (mresume11 == 1 && i_ex(obj_battlecontroller) && i_ex(global.charinstance[1]))
     {
         mresume11 = 0;
@@ -7904,8 +8090,8 @@ if (variable_instance_exists(id, ""modbattle"") && modbattle == 1)
         {
             mfin = 4;
             mfintimer = 0;
-            mlastj = [""……/%"", ""これで&ふたりきりじゃな。/%"", ""最後に　もう一度&聞く。/%"", ""ふるまいを&改める気は&ないか？/%"", ""…。/%"", ""…そうか。&予言とは&異なるが/%"", ""そのタマシイを&砕いてでも&2人を&助けるとするかの。/%""];
-            mlaste = [""....../%"", ""So it's just&us two now./%"", ""I'll ask ya&one last time./%"", ""Ya got any&intention of&changin' your&ways?/%"", ""..../%"", ""...I see.&It ain't what&the prophecy&says, but.../%"", ""I'll save the&both of 'em, even&if I gotta&shatter that&SOUL of yours./%""];
+            mlastj = [""……/%"", ""これで&ふたりきりじゃな。/%"", ""最後に　もう一度&聞く。/%"", ""ふるまいを&改める気は&ないか？/%"", ""…。/%"", ""…そうか。&予言とは&異なるが/%"", ""そのタマシイを&砕いてでも&止めるとするかの。/%""];
+            mlaste = [""....../%"", ""So it's just&us two now./%"", ""I'll ask ya&one last time./%"", ""Ya got any&intention of&changin' your&ways?/%"", ""..../%"", ""...I see.&It ain't what&the prophecy&says, but.../%"", ""I'll stop ya&even if I gotta&shatter that&SOUL of yours./%""];
             mlastk = [0, 0, 0, 0, 1, 0, 0];
             mli = 0;
             global.typer = 86;
