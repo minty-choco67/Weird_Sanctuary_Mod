@@ -1,3 +1,5 @@
+フリーズの報告を受けて現在原因の調査中です。
+
 # Weird Sanctuary
 
 [日本語](#日本語) | [English](#english)
